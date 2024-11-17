@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Room Scheduler</title>
+        <link type="text/css" href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet"/>
+        <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+    </head>
+    <body>
+        <div id = "title">
+            <h1>Room Scheduler</h1>
+        </div>
+        <div id="login-box" hidden="true">
+            Email: <input type="email" name="" id="email"><br/>
+            Password: <input type="password" name="" id="password"><br/>
+            <button id="login">Login</button>
+            <button id="sign-up">Sign Up</button>
+        </div>
+        {% if not user_token %}
+        <br><br>
+        {% endif %}
+        <div id="logout-box" hidden="true" style="position: absolute; top: 1%; right: 1.5%;">
+            <button id="sign-out">Sign out {{ user_token.email }}</button>
+        </div>
+        {% if user_token %}
+        <div>
+        <form action="/page-booking" method="get" style="display: inline-block; margin-right: 10px;">
+            <button type="submit">New Booking</button>
+        </form>
+        <form action="/page-addingroom" method="get" style="display: inline-block; margin-right: 10px;">
+            <button type="submit">New Room</button>
+        </form>
+        <br>
+        </div>
+        {% endif %}
+        <div>
+            <br>
+            <form action="/" method="get">
+                <label for="date-rooms-all-bookings">Select a Date:</label>
+                <input type="date" id="date-rooms-all-bookings" name="date-rooms-all-bookings" value="{{ selected_date }}">
+                <button type="submit">Submit</button>
+            </form>
+            <br>            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Room Name</th>
+                        <th>Created By</th>
+                        <th>Bookings</th>
+                        <th>{% if user_token %}Delete Room{% endif %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for room in exp_rooms %}
+                    <tr>
+                        <td>
+                            <a href="/room/{{ room.id }}">{{ room.room_name }}</a>
+                        </td>
+                        <td>{{ room.email }}</td>
+                        <td>
+                        {% if room['bookings'] %}
+                            {% for booking in room['bookings'] %}
+                                <div class="booking-details">
+                                    Booking ID: {{ booking.id }}, Start Date: {{ booking.date }}, Start Time: {{ booking.start_time }}, End Time: {{ booking.end_time }}
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div>No bookings for this room.</div>
+                        {% endif %}
+                        </td>
+                        <td>
+                            {% if user_token %}
+                            {% if room.email == user_token.email %}
+                            <form action="/delete-room" method="post">
+                                <input type="hidden" name="room_id" value="{{ room.id }}">
+                                <button type="submit">Delete</button>
+                            </form>
+                            {% else %}
+                                <button type="submit" disabled style="background-color: grey; cursor: not-allowed;">Delete</button>
+                            {% endif %}               
+                            {% endif %}             
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>                
+        </div>        
+        <br>
+        {% if user_token %}
+        <div>
+            <p>User bookings for all Rooms</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Booking Room</th>
+                    <th>Booking Date</th>
+                    <th>Booking Start Time</th>
+                    <th>Booking End Time</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in exp_current_user %}
+                <tr>
+                    <td>{{ booking.name }}</td>
+                    <td>{{ booking.email }}</td>
+                    <td>{{ booking.room_name }}</td>
+                    <td>{{ booking.date }}</td>
+                    <td>{{ booking.start_time }}</td>
+                    <td>{{ booking.end_time }}</td>
+                    <td>
+                        <form action="/page-edit-booking-user" method="post">
+                            <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                            <input type="hidden" name="booking_name" value="{{ booking.name }}">
+                            <input type="hidden" name="booking_email" value="{{ booking.email }}">
+                            <input type="hidden" name="booking_room_id" value="{{ booking.room_id }}">
+                            <input type="hidden" name="booking_date" value="{{ booking.date }}">
+                            <input type="hidden" name="booking_start_time" value="{{ booking.start_time }}">
+                            <input type="hidden" name="booking_end_time" value="{{ booking.end_time }}">
+                            <button type="submit">Edit</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form action="/delete-booking" method="post">
+                            <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>            
+        </table>
+        </div>
+        <br>
+        {% endif %}
+
+        {% if user_token %}
+        <form action="/" method="get">
+            <label for="room-select-a">Select a Room:</label>
+            <select name="room-select-a" id="room-select-a">
+                <option value="" disabled selected>Select</option>
+                {% for room in exp_rooms %}
+                <option value="{{ room.room_name }}">{{ room.room_name }}</option>
+                {% endfor %}
+            </select>            
+            <button type="submit">Submit</button>
+        </form>
+        {% if user_token %}
+        <div>
+            <p>User bookings for selected Rooms</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Booking Room</th>
+                        <th>Booking Date</th>
+                        <th>Booking Start Time</th>
+                        <th>Booking End Time</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in exp_current_user_specific_room %}
+                    <tr>
+                        <td>{{ booking.name }}</td>
+                        <td>{{ booking.email }}</td>
+                        <td>{{ booking.room_name }}</td>
+                        <td>{{ booking.date }}</td>
+                        <td>{{ booking.start_time }}</td>
+                        <td>{{ booking.end_time }}</td>
+                        <td>
+                            <form action="/page-edit-booking-user" method="post">
+                                <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                                <input type="hidden" name="booking_name" value="{{ booking.name }}">
+                                <input type="hidden" name="booking_email" value="{{ booking.email }}">
+                                <input type="hidden" name="booking_room_id" value="{{ booking.room_id }}">
+                                <input type="hidden" name="booking_date" value="{{ booking.date }}">
+                                <input type="hidden" name="booking_start_time" value="{{ booking.start_time }}">
+                                <input type="hidden" name="booking_end_time" value="{{ booking.end_time }}">
+                                <button type="submit">Edit</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="/delete-booking" method="post">
+                                <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>                
+            </table>
+        </div>
+        <br><br>
+        {% endif %}
+        {% endif %}
+    </body>
+</html>

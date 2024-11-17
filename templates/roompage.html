@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Room Details</title>
+    <link type="text/css" href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet"/>
+</head>
+<body>
+    <h1>Room Details: {{ room.room_name }}</h1>
+    <p>Room ID: {{ room_id }}</p>
+    <p>Room Owner: {{ room.email }}</p>
+    <h2>All Bookings:</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Booking Room ID</th>
+                <th>Booking Date</th>
+                <th>Booking Start Time</th>
+                <th>Booking End Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.id }}</td>
+                <td>{{ booking.name }}</td>
+                <td>{{ booking.email }}</td>
+                <td>{{ booking.room_id }}</td>
+                <td>{{ booking.date }}</td>
+                <td>{{ booking.start_time }}</td>
+                <td>{{ booking.end_time }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    {% if ISroomowner %}
+    <form action="/delete-room" method="POST">
+        <input type="hidden" name="room_id" value="{{ room_id }}">
+        <button id="deleteroompage" type="submit">Delete Room</button>
+    </form>
+    {% endif %}
+    <a href="/">Back to Home</a>
+</body>
+</html>

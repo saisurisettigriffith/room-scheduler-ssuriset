@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Room Booking</title>
+    <link type="text/css" href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet"/>
+</head>
+<body>
+    <h1>Room Booking</h1>
+    <form action="/post-booking" method="POST">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+        
+        <label for="room">Room:</label>
+        <select id="room" name="room" required>
+            {% for room in exp_rooms %}
+            <option value="{{ room.room_name }}">{{ room.room_name }}</option>
+            {% endfor %}
+        </select><br><br>
+        
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required><br><br>
+        
+        <label for="start-time">Starting Time:</label>
+        <input type="time" id="start_time" name="start_time" required><br><br>
+        
+        <label for="end-time">Ending Time:</label>
+        <input type="time" id="end_time" name="end_time" required><br><br>
+        
+        <input type="submit" value="Book">
+    </form>
+</body>
+</html>
